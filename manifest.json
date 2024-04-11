@@ -1,22 +1,20 @@
 {
-    "name": "My YT Bookmarks",
+    "name": "Pretty Speed Controll",
     "version": "0.1.0",
-    "description": "Saving timestamps in YT videos",
-    "permissions": ["storage", "tabs"],
-    "host_permissions": ["<all_urls>"],
-    "background": {
-      "service_worker": "background.js"
-    },
+    "description": "Speed controll of HTML5 video",
+    "permissions": [],
+    "host_permissions": ["http://*/*", "https://*/*", "file:///*"],
+    "homepage_url": "https://github.com/Buraska/pretty_speed_controll",
     "content_scripts": [
       {
-        "matches": ["<all_urls>"],
+        "matches": ["http://*/*", "https://*/*", "file:///*"],
         "js": ["contentScript.js"]
       }
     ],
     "web_accessible_resources": [
       {
-        "resources": [],
-        "matches": ["<all_urls>"]
+        "resources": ["shadow.css"],
+        "matches": ["http://*/*", "https://*/*", "file:///*"]
       }
     ],
     "action": {
@@ -25,7 +23,7 @@
         "24": "assets/ext-icon.png",
         "32": "assets/ext-icon.png"
       },
-      "default_title": "My YT Bookmarks",
+      "default_title": "Pretty Speed Controll",
       "default_popup": "popup.html"
     },
     "manifest_version": 3
