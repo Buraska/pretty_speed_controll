@@ -10,16 +10,11 @@ This is a source code of Google Chrome extension for HTML5 video speed controlli
 ![Rayan](https://github.com/Buraska/pretty_speed_controll/assets/73584781/5b50bf5b-ca51-4a1d-963d-544d1f5702ef)
 
 
-**Instruction:** You can create Speed Master by clicking on the extension icon or by pressing the Ctrl + (220 keycode) combination. 
+**Instruction:** You can open Speed Master window by clicking on the extension icon or by pressing the "Ctrl + \"(220 keycode) combination. 
 
 ***Shortcut combination***
 ![image](https://github.com/Buraska/pretty_speed_controll/assets/73584781/f5f9b72b-c3fe-474f-bf3c-b9e0d1106a48)
 
-
-**Tags:** Chrome, Extension, Video, Speed, Playback, Design.
-
 **License:** MIT License.
 
-**Project Links:**
-- GitHub Repository: [link-to-github-repo]
 - Chrome Web Store: [link-to-chrome-web-store]
