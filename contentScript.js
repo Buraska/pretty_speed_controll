@@ -74,6 +74,8 @@ function initializeNow(document) {
 
 
 function attachSpeedController() {
+
+  //TODO No need to reload it fully.
   //Delete and reload the vidget if it already exists
   if (isWidgetActive) { 
     document.querySelector("#pretty-vsc").shadowRoot.querySelector("#closeButton").click();
