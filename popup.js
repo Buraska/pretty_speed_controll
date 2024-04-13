@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     container.innerHTML = '<div class="title">No video was founded.</div>'
                 }
             } else {
-                container.innerHTML = '<div class="title">Page has not been loaded yet.</div>'
+                container.innerHTML = '<div class="title">Page has not been loaded yet or no video was founded.</div>'
             }
         })
     } catch (error) { }

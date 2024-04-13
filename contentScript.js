@@ -2,11 +2,15 @@
   initializeWhenReady(document)
 })();
 
+
+
+
 let lastSpeed = 1.00;
 let currentVideo;
 let isInitialized = false
 let xPos = (window.innerWidth - window.innerWidth/5) + "px";
 let yPos = (0) + "px"
+let isWidgetActive = false
 
 const shortCutHandler = function (event) {
 
@@ -39,6 +43,7 @@ const shortCutHandler = function (event) {
 
 
 function findVideo(){
+  log("findVideo()", 4)
   currentVideo = document.querySelector("video")
   if (!currentVideo) { return false }
   return true
@@ -48,6 +53,7 @@ function findVideo(){
 function initializeNow(document) {
   if (isInitialized) { return }
   isInitialized = true
+  log("initializeNow() isInit after", 4)
 
   document.addEventListener('keydown', shortCutHandler);
 
@@ -56,6 +62,7 @@ function initializeNow(document) {
     if (type === "VIDEO_CHECK_REQUEST") {
 
       if (findVideo()) {
+        log("initializeNow() if findVideo()", 4)
         response({ type: "VIDEO_CHECK_RESULT", value: true, playbackRate: currentVideo.playbackRate })
         attachSpeedController()
       } else {
@@ -67,13 +74,11 @@ function initializeNow(document) {
 
 
 function attachSpeedController() {
-
-  currentVideo = document.querySelector("video")
-
   //Delete and reload the vidget if it already exists
-  if (document.querySelector("#pretty-vsc")) { 
+  if (isWidgetActive) { 
     document.querySelector("#pretty-vsc").shadowRoot.querySelector("#closeButton").click();
   }
+  isWidgetActive = true
 
   let speedValue = currentVideo.playbackRate
   const wrapper = document.createElement("div");
@@ -128,6 +133,7 @@ function attachSpeedController() {
     currentVideo.playbackRate = speedValue
     lastSpeed = speedValue
     sliderValue.textContent = speedValue;
+    log(currentVideo, 5)
   }
   const closeButtonHandler = function () {
     closeButton.removeEventListener("click", closeButtonHandler);
@@ -135,6 +141,7 @@ function attachSpeedController() {
     slider.removeEventListener("input", sliderHandler);
     shadow.querySelector(".draggable").removeEventListener("mousedown", draggableHandler);
     wrapper.remove();
+    isWidgetActive = false
   }
 
 
@@ -185,9 +192,9 @@ function handleDrag(e, controller) {
   window.addEventListener("mousemove", startDragging);
 }
 
-
 function initializeWhenReady(document) {
   window.onload = () => {
+    log("initializeWhenReady.OnLoad", 4)
     initializeNow(document);
   };
   if (document) {
@@ -199,6 +206,46 @@ function initializeWhenReady(document) {
           initializeNow(document);
         }
       };
+    }
+  }
+}
+
+
+window.navigation.addEventListener("navigate", (event) => {
+  //For ability to navigate on pages with the same vidget
+  if(isWidgetActive){
+    if(findVideo()){
+      attachSpeedController()
+    }
+  }
+})
+
+
+/* Log levels (depends on caller specifying the correct level)
+  1 - none
+  2 - error
+  3 - warning
+  4 - info
+  5 - debug
+  6 - debug high verbosity + stack trace on each message
+*/
+
+var speed_master_verbosity
+function log(message, level) {
+  if(!speed_master_verbosity){return}
+
+  if (speed_master_verbosity >= level) {
+    if (level === 2) {
+      console.log("ERROR:" + message);
+    } else if (level === 3) {
+      console.log("WARNING:" + message);
+    } else if (level === 4) {
+      console.log("INFO:" + message);
+    } else if (level === 5) {
+      console.log("DEBUG:" + message);
+    } else if (level === 6) {
+      console.log("DEBUG (VERBOSE):" + message);
+      console.trace();
     }
   }
 }
