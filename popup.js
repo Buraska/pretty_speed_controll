@@ -1,5 +1,9 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
+
+
+
+
     const curTab = await getActiveTab()
     let container = document.getElementsByClassName("container")[0]
 
@@ -8,7 +12,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.tabs.sendMessage(curTab.id, { type: 'VIDEO_CHECK_REQUEST' }, function (response) {
             if (response && response.type === "VIDEO_CHECK_RESULT") {
                 if (response.value) {
-                    container.innerHTML = '<div class="title">Press "Ctr + \\(220 keycode)" for quick startup.</div>'
+                    container.innerHTML = `
+                    <div class="title">Press "Ctr + \\(220 keycode)" for quick startup.</div>
+                    <hr/>
+                    <button class="button" id="config">Settings</button>
+                    `
+                    document.querySelector("#config").addEventListener("click", function () {
+                        window.open(chrome.runtime.getURL("options.html"));
+                      });
+
                 } else {
                     container.innerHTML = '<div class="title">No video was founded.</div>'
                 }

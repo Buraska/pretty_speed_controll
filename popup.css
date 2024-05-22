@@ -1,5 +1,30 @@
 
 .container {
+  display: flex; 
   width: 280px;
   color: #314d3e;
+}
+
+.button {
+  border: none;
+  color: white;
+  /* padding: 16px 32px; */
+  text-align: center;
+  /* text-decoration: none; */
+  display: inline-block;
+  font-size: 12px;
+  /* margin: 4px 2px; */
+  transition-duration: 0.1s;
+  cursor: pointer;
+}
+
+.button {
+  background-color: white; 
+  color: black; 
+  margin-left: 4px;
+  /* border: 2px solid #04AA6D; */
+}
+
+.button:hover {
+  color: rgb(94, 94, 94);
 }

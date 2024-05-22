@@ -2,7 +2,7 @@
     "name": "Pretty Speed Controll",
     "version": "0.1.0",
     "description": "Speed controll of HTML5 video",
-    "permissions": [],
+    "permissions": ["storage"],
     "host_permissions": ["http://*/*", "https://*/*", "file:///*"],
     "homepage_url": "https://github.com/Buraska/pretty_speed_controll",
     "content_scripts": [
@@ -19,9 +19,11 @@
     ],
     "action": {
       "default_icon": {
-        "16": "assets/ext-icon.png",
-        "24": "assets/ext-icon.png",
-        "32": "assets/ext-icon.png"
+        "16": "assets/icon16.png",
+        "24": "assets/icon48.png",
+        "32": "assets/icon48.png",
+        "48": "assets/icon48.png",
+        "128": "assets/icon128.png"
       },
       "default_title": "Pretty Speed Controll",
       "default_popup": "popup.html"
