@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (response && response.type === "VIDEO_CHECK_RESULT") {
                 if (response.value) {
                     container.innerHTML = `
-                    <div class="title">Press "Ctr + \\(220 keycode)" for quick startup.</div>
+                    <div class="title">Speed controller is created. Press "Ctr + \\(220 keycode)" for quick startup.</div>
                     <hr/>
                     <button class="button" id="config">Settings</button>
                     `
