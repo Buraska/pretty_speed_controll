@@ -1,116 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  padding: 14px 16px;
+  color: #fff;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  background: rgba(0, 0, 0, 0.1);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  transition: box-shadow 0.2s ease;
+}
+
+.container:hover {
+  /* background: rgba(0, 0, 0, 0.42);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3); */
+}
+
+.container.dragging {
+  cursor: grabbing;
+}
+
+.container.dragging .top-bar,
+.container.dragging .bottom-bar {
+  pointer-events: none;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.min-value,
+.max-value {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.slider:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
 #sliderValue {
-    font-weight: 500;
-    font-size: larger;
-    display: flex;
-    justify-content: center; /* Центрирование по горизонтали */
-    align-items: center; /* Центрирование по вертикали */
-  }
-  
-  .closeButton {
-    margin-right: 0.3rem;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
 
-    /* display: flex;
-    justify-content: center;
-    align-items: center; */
-  }
-  
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-  
-  .restoreButton {
-    /* text-align: center;
-    text-decoration: none;
-    display: inline-block; */
-    margin-left: 0.3rem;
+.button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
 
-  }
-  
+.restoreButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
-
-  .button{
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-
-    transition-duration: 0.2s;
-    background-color: rgba(58, 58, 58, 0);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .button:hover {
-    color: rgb(99, 99, 99);
-  }
-  
-  .bottom-bar {
-    display: flex;
-    align-items: center; 
-    justify-content: space-between;
-  }
-  
-  
-  .top-bar {
-    display: flex;
-    align-items: center; 
-    margin-bottom: 0.5rem;
-  }
-  
-  .min-value, .max-value {
-    font-size: larger;
-    font-weight: 300;
-    margin: 0 10px;
-  }
-  
-  
-  .slider {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 25px;
-    background: #d3d3d3;
-    outline: none;
-    opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-  }
-  
-  .slider:hover {
-    opacity: 1;
-  }
-  
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    background: #000000;
-    cursor: pointer;
-  }
-  
-  .slider::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    background: #000000;
-    cursor: pointer;
-  }
-  
-  
-  .container {
-    display: flex;
-    flex-direction: column;
-    width: 280px;
-    color: #1b1b1b;
-    background-color: rgba(255, 255, 255, 0.473);
-    position: fixed;
-    top: 0; /* adjust as needed */
-    left: 0; /* adjust as needed */
-    z-index: 9999; /* adjust as needed, higher values appear on top of lower values */
-  }
-  
-  
-  
-  
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
