@@ -2,7 +2,8 @@
   initializeWhenReady(document)
 })();
 
-let boostSpeed = 2.00;
+const controllerBrain = new ControllerBrain()
+
 let currentVideo;
 let isInitialized = false
 let xPos = (window.innerWidth - window.innerWidth / 5) + "px";
@@ -33,6 +34,8 @@ function setupPressingListeners() {
   observer.observe(document, { childList: true, subtree: true })
 }
 
+
+
 const swallowClick = (e) => {
   e.stopPropagation()
 }
@@ -49,12 +52,13 @@ function attachPressingListenerToVideo(video) {
         video.addEventListener("click", swallowClick, { capture: true, once: true })
 
         currentVideo = video
+        controllerBrain.setCurrentVideo(video)
         if (!isWidgetActive) {
           xPos = `${e.clientX + window.scrollX - vscOffsetX}px`
           yPos = `${e.clientY + window.scrollY - vscOffsetY}px`
         }
         showClickMarker(e.clientX, e.clientY)
-        toggleSpeed();
+        controllerBrain.toggleOn()
       }
     }, 499);
   }, true);
@@ -71,33 +75,31 @@ function showClickMarker(clientX, clientY) {
     activeClickMarker = null;
   }
 
+  const left = `${clientX + window.scrollX}px`;
+  const top = `${clientY + window.scrollY - 36}px`;
+  const speedLabelText = controllerBrain.getToggleSpeed()
+
+  const markerTemplate = `
+    <div class="vsc-marker-label">${speedLabelText}</div>
+    <div class="vsc-marker-circle">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="#ffffff" d="M17 8h-1V6a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-6 8.73V17a1 1 0 1 0 2 0v-.27a2 2 0 1 0-2 0zM10 8V6a2 2 0 1 1 4 0v2h-4z"/>
+      </svg>
+    </div>
+  `;
+
   const marker = document.createElement("div");
   marker.className = "vsc-marker";
-  marker.style.left = `${clientX + window.scrollX}px`;
-  marker.style.top = `${clientY + window.scrollY - 36}px`;
-
-  const markerCircle = document.createElement("div");
-  markerCircle.className = "vsc-marker-circle";
-  const lockIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  lockIcon.setAttribute("viewBox", "0 0 24 24");
-  lockIcon.setAttribute("width", "16");
-  lockIcon.setAttribute("height", "16");
-  lockIcon.setAttribute("aria-hidden", "true");
-  lockIcon.innerHTML = '<path fill="#ffffff" d="M17 8h-1V6a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zm-6 8.73V17a1 1 0 1 0 2 0v-.27a2 2 0 1 0-2 0zM10 8V6a2 2 0 1 1 4 0v2h-4z"/>';
-  markerCircle.appendChild(lockIcon);
-
-  const speedLabel = document.createElement("div");
-  speedLabel.className = "vsc-marker-label";
-  speedLabel.textContent = `${Number(currentVideo?.playbackRate ?? 1).toFixed(1) == Number(boostSpeed).toFixed(1) ? '1.0' : Number(boostSpeed).toFixed(1)}`;
-
-  marker.appendChild(speedLabel);
-  marker.appendChild(markerCircle);
+  marker.style.left = left;
+  marker.style.top = top;
+  marker.innerHTML = markerTemplate;
 
   document.body.appendChild(marker);
   activeClickMarker = marker;
 
+  const lockIcon = marker.querySelector(".vsc-marker-circle svg");
+
   const cleanupMarker = () => {
-    document.removeEventListener("mouseup", documentMouseUpHandler, true);
     marker.remove();
     if (activeClickMarker === marker) {
       activeClickMarker = null;
@@ -107,10 +109,15 @@ function showClickMarker(clientX, clientY) {
   const markerMouseUpHandler = () => {
     marker.classList.add("vsc-marker-clicked");
     lockIcon.classList.add("vsc-lock-animate");
-    marker.addEventListener("click", () => {
+    document.removeEventListener("mouseup", documentMouseUpHandler, true);
+    currentVideo.addEventListener("mouseup", documentMouseUpHandler, {capture: true, once: true});
 
+    marker.addEventListener("click", () => {
       setTimeout(() => {
         attachSpeedController();
+        document.removeEventListener("mouseup", documentMouseUpHandler, true);
+        currentVideo.removeEventListener("mouseup", documentMouseUpHandler, true);
+
         cleanupMarker();
         currentVideo?.removeEventListener("click", swallowClick, true);
       }, 120);
@@ -120,49 +127,24 @@ function showClickMarker(clientX, clientY) {
   const documentMouseUpHandler = (event) => {
     if (!marker.contains(event.target)) {
       cleanupMarker();
-      toggleSpeed();
+      // currentVideo?.removeEventListener("click", swallowClick, true);
+      controllerBrain.toggleOff();
     }
   };
 
   marker.addEventListener("mouseup", markerMouseUpHandler, { once: true });
-  document.addEventListener("mouseup", documentMouseUpHandler, true);
+  document.addEventListener("mouseup", documentMouseUpHandler, {capture: true, once: true});
 }
 
 
-function findVideo() {
-  currentVideo = document.querySelector("video")
-  if (!currentVideo) { return false }
-  return true
-}
 
-
-function initializeNow(document) {
-  if (isInitialized) { return }
-  isInitialized = true
-  setupPressingListeners()
-
-  chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, value } = obj;
-    if (type === "VIDEO_CHECK_REQUEST") {
-
-      if (findVideo()) {
-        response({ type: "VIDEO_CHECK_RESULT", value: true, playbackRate: currentVideo.playbackRate })
-        attachSpeedController()
-      } else {
-        response({ type: "VIDEO_CHECK_RESULT", value: false })
-      }
-    }
-  })
-}
-
-
-function toggleSpeed() {
-  if (!currentVideo) return
-  if (currentVideo.playbackRate == 1.00) { currentVideo.playbackRate = boostSpeed }
-  else {
-    currentVideo.playbackRate = 1
-  }
-}
+// function toggleSpeed() {
+//   if (!currentVideo) return
+//   if (currentVideo.playbackRate == 1.00) { currentVideo.playbackRate = toggleRate }
+//   else {
+//     currentVideo.playbackRate = 1
+//   }
+// }
 
 function attachSpeedController() {
   //TODO No need to reload it fully.
@@ -172,11 +154,17 @@ function attachSpeedController() {
   }
   isWidgetActive = true
 
-  let speedValue = currentVideo.playbackRate
+  controllerBrain.setCurrentVideo(currentVideo)
+  let speedValue = controllerBrain.getCurrentSpeed(false)
+  if (speedValue == null || Number.isNaN(speedValue)) speedValue = 1
   const wrapper = document.createElement("div");
   wrapper.classList.add("vsc-controller");
   wrapper.id = "pretty-vsc";
+  let toggleRate = controllerBrain.getToggleSpeed()
+  let baseRate = controllerBrain.getBaseSpeed()
+  const isToggled = controllerBrain.getIsToggled()
 
+  const activeRateStyle = "font-size: 1.6em; font-weight: 800;"
   const shadow = wrapper.attachShadow({ mode: "open" });
   const shadowTemplate = `
         <style>
@@ -192,7 +180,14 @@ function attachSpeedController() {
     </div>
 
       <div class="bottom-bar">
-          <span style="user-select: none; padding: 2px" id="sliderValue">${speedValue.toFixed(1)}</span>
+          <div class="speed-display">
+            <span id="baseRate" class="toggle-rate-value" style="${isToggled ? "" : activeRateStyle}">${baseRate}</span>
+            <span class="speed-label">base rate</span>
+          </div>
+          <div class="speed-display">
+            <span style="user-select: none; ${isToggled ? activeRateStyle : ""}" id="toggleRate">${toggleRate}</span>
+            <span class="speed-label">toggle rate</span>
+          </div>
           <button id="restoreButton" class="button restoreButton">⇆</button>
           <span><button id="closeButton" class="button closeButton">X</button></span>
       </div>
@@ -207,7 +202,8 @@ function attachSpeedController() {
 
   const restoreButton = shadow.querySelector("#restoreButton");
   const slider = shadow.querySelector("#speedSlider");
-  const sliderValue = shadow.querySelector("#sliderValue");
+  const baseRateElement = shadow.querySelector("#baseRate");
+  const toggleRateElement = shadow.querySelector("#toggleRate");
   const closeButton = shadow.querySelector("#closeButton");
 
   const draggableHandler = (e) => {
@@ -215,41 +211,49 @@ function attachSpeedController() {
     e.stopPropagation();
   }
 
-  const restoreButtonHandler = function () {
-    toggleSpeed()
+
+  const toggleButtonHandler = function () {
+    controllerBrain.toggleSpeed()
+    const big = activeRateStyle
+    const small = ""
+    if (controllerBrain.getIsToggled()) {
+      baseRateElement.style.cssText = ""
+      toggleRateElement.style.cssText = `user-select: none; ${big}`
+    } else {
+      baseRateElement.style.cssText = big
+      toggleRateElement.style.cssText = "user-select: none;"
+    }  
   }
 
   const sliderHandler = function (event) {
-    speedValue = (event.currentTarget.value * 0.1).toFixed(1)
-    currentVideo.playbackRate = speedValue
-    boostSpeed = speedValue
-    sliderValue.textContent = speedValue;
-  }
-  const closeButtonHandler = function () {
-    closeButton.removeEventListener("click", closeButtonHandler);
-    restoreButton.removeEventListener("click", restoreButtonHandler);
-    slider.removeEventListener("input", sliderHandler);
-    shadow.querySelector(".draggable").removeEventListener("mousedown", draggableHandler);
-    wrapper.remove();
-    isWidgetActive = false
+    controllerBrain.setCurrentSpeed(Number(event.currentTarget.value) * 0.1)
+    baseRateElement.textContent = controllerBrain.getBaseSpeed()
+    toggleRateElement.textContent = controllerBrain.getToggleSpeed()
   }
 
   const ratechangeHandler = () => {
-    const rate = Number(currentVideo.playbackRate);
+    const rate = controllerBrain.getCurrentSpeed(false);
+    if (rate == null || Number.isNaN(rate)) return;
     slider.value = String(Math.round(rate * 10));
-    sliderValue.textContent = rate.toFixed(1);
-    speedValue = rate;
   }
 
-  currentVideo.addEventListener("ratechange", ratechangeHandler)
-  restoreButton.addEventListener("click", restoreButtonHandler)
+  const closeButtonHandler = function () {
+    currentVideo.removeEventListener("ratechange", ratechangeHandler);
+    closeButton.removeEventListener("click", closeButtonHandler);
+    restoreButton.removeEventListener("click", toggleButtonHandler);
+    slider.removeEventListener("input", sliderHandler);
+    shadow.querySelector(".draggable").removeEventListener("mousedown", draggableHandler);
+    wrapper.remove();
+    isWidgetActive = false;
+    controllerBrain.toggleOff();
+  };
+
+  currentVideo.addEventListener("ratechange", ratechangeHandler);
+  restoreButton.addEventListener("click", toggleButtonHandler);
   slider.addEventListener("input", sliderHandler);
-  shadow.querySelector(".draggable").addEventListener("mousedown", draggableHandler)
+  shadow.querySelector(".draggable").addEventListener("mousedown", draggableHandler);
   closeButton.addEventListener("click", closeButtonHandler);
-  currentVideo.addEventListener("ratechange", handleDrag)
 }
-
-
 
 function handleDrag(e, controller) {
   if ((e.target.tagName !== "DIV" && e.target.tagName !== "SPAN")) {
@@ -292,6 +296,11 @@ function handleDrag(e, controller) {
 }
 
 
+function initializeNow(document) {
+  if (isInitialized) { return }
+  isInitialized = true
+  setupPressingListeners()
+}
 
 function initializeWhenReady(document) {
   window.onload = () => {
@@ -311,13 +320,3 @@ function initializeWhenReady(document) {
 }
 
 
-if (window.navigation) {
-  window.navigation.addEventListener("navigate", () => {
-    //For ability to navigate on pages with the same widget
-    if (isWidgetActive) {
-      if (findVideo()) {
-        attachSpeedController();
-      }
-    }
-  });
-}

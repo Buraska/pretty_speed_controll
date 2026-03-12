@@ -7,7 +7,7 @@
     "content_scripts": [
       {
         "matches": ["http://*/*", "https://*/*", "file:///*"],
-        "js": ["contentScript.js"],
+        "js": ["lib/controllerBrain.js", "contentScript.js"],
         "css": ["marker.css"]
       }
     ],
