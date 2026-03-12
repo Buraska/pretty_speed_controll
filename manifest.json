@@ -2,7 +2,6 @@
     "name": "Video Speed Toggle",
     "version": "0.1.0",
     "description": "Speed control with toggle feature",
-    "host_permissions": ["http://*/*", "https://*/*", "file:///*"],
     "homepage_url": "https://github.com/Buraska/pretty_speed_controll",
     "content_scripts": [
       {
