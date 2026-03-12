@@ -42,9 +42,8 @@ function attachPressingListenerToVideo(video) {
   observedVideos.add(video)
 
   video.addEventListener("mousedown", (e) => {
-  e.stopPropagation()
-    
-    videoPressed = true
+    e.stopPropagation();
+    videoPressed = true;
     setTimeout(() => {
       if (videoPressed) {
         video.addEventListener("click", swallowClick, { capture: true, once: true })
@@ -57,9 +56,8 @@ function attachPressingListenerToVideo(video) {
         showClickMarker(e.clientX, e.clientY)
         toggleSpeed();
       }
-    }, 499)
-  },
-    true)
+    }, 499);
+  }, true);
 
   video.addEventListener("mouseup", () => {
     videoPressed = false
@@ -107,12 +105,14 @@ function showClickMarker(clientX, clientY) {
   };
 
   const markerMouseUpHandler = () => {
+    marker.classList.add("vsc-marker-clicked");
+    lockIcon.classList.add("vsc-lock-animate");
     marker.addEventListener("click", () => {
-      marker.classList.add("vsc-marker-clicked");
+
       setTimeout(() => {
         attachSpeedController();
         cleanupMarker();
-        currentVideo.removeEventListener("click", swallowClick, true);
+        currentVideo?.removeEventListener("click", swallowClick, true);
       }, 120);
     }, { once: true });
   };
@@ -128,35 +128,6 @@ function showClickMarker(clientX, clientY) {
   document.addEventListener("mouseup", documentMouseUpHandler, true);
 }
 
-const shortCutHandler = function (event) {
-
-  // Ignore if following modifier is active inclusive control.
-  if (
-    event.getModifierState("Alt") ||
-    event.getModifierState("Fn") ||
-    event.getModifierState("Meta") ||
-    event.getModifierState("Hyper") ||
-    event.getModifierState("OS")
-  ) {
-    return false;
-  }
-  // Ignore keydown event if typing in an input box
-  if (
-    event.target.nodeName === "INPUT" ||
-    event.target.nodeName === "TEXTAREA" ||
-    event.target.isContentEditable
-  ) {
-    return false;
-  }
-
-  //ignore if there is no video
-
-  if (event.ctrlKey && event.keyCode === 220) {
-    if (!findVideo()) { return false }
-    attachSpeedController()
-  }
-}
-
 
 function findVideo() {
   currentVideo = document.querySelector("video")
@@ -168,9 +139,6 @@ function findVideo() {
 function initializeNow(document) {
   if (isInitialized) { return }
   isInitialized = true
-
-  document.addEventListener('keydown', shortCutHandler);
-
   setupPressingListeners()
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
@@ -343,11 +311,13 @@ function initializeWhenReady(document) {
 }
 
 
-window.navigation.addEventListener("navigate", () => {
-  //For ability to navigate on pages with the same vidget
-  if (isWidgetActive) {
-    if (findVideo()) {
-      attachSpeedController()
+if (window.navigation) {
+  window.navigation.addEventListener("navigate", () => {
+    //For ability to navigate on pages with the same widget
+    if (isWidgetActive) {
+      if (findVideo()) {
+        attachSpeedController();
+      }
     }
-  }
-})
+  });
+}

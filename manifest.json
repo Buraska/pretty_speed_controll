@@ -1,7 +1,7 @@
 {
-    "name": "Pretty Speed Controll",
+    "name": "Video Speed Toggle",
     "version": "0.1.0",
-    "description": "Speed controll of HTML5 video",
+    "description": "Speed control with toggle feature",
     "host_permissions": ["http://*/*", "https://*/*", "file:///*"],
     "homepage_url": "https://github.com/Buraska/pretty_speed_controll",
     "content_scripts": [
@@ -25,7 +25,7 @@
         "48": "assets/icon48.png",
         "128": "assets/icon128.png"
       },
-      "default_title": "Pretty Speed Controll",
+      "default_title": "Video Speed Toggle",
       "default_popup": "popup.html"
     },
     "manifest_version": 3
