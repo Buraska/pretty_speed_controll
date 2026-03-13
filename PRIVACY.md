@@ -18,7 +18,7 @@ The extension **does not collect, store, or transmit any personal data or usage 
 - Location: We do not collect any location information.
 - Web History: We do not collect any web history information.
 - User Activity: We do not collect any user activity data.
--Website Content: We do not collect any content from the websites you visit.
+- Website Content: We do not collect any content from the websites you visit.
 
 ## 3. What the extension does on your device
 

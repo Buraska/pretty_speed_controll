@@ -16,6 +16,38 @@ let activeClickMarker = null
 let vscOffsetX = 140
 let vscOffsetY = 59
 
+const DEBUG_EVENTS = true
+function logEvent(eventType, options = {}) {
+  if (!DEBUG_EVENTS) return
+  let callerName = ""
+  let callerLine = ""
+  let stackTrace = ""
+  try {
+    const stack = new Error().stack || ""
+    const lines = stack.split("\n").map((s) => s.trim()).filter(Boolean)
+    const skip = lines.findIndex((line) => line.includes("logEvent"))
+    const relevant = lines.slice(skip + 1, skip + 5)
+    stackTrace = relevant.join("\n")
+    const first = relevant[0] || ""
+    const match = first.match(/at\s+(?:async\s+)?(?:Object\.)?(\S+)\s*\(([^)]+)\)/) || first.match(/at\s+(.+)/)
+    if (match) {
+      callerName = match[1] || match[0]
+      const loc = (match[2] || "").trim()
+      if (loc) callerLine = loc
+    }
+  } catch (_) {}
+  console.log(
+    eventType,
+    "\n  caller:",
+    callerName || "(anonymous)",
+  )
+}
+
+const swallowClick = (e) => {
+  logEvent("swallow click", { capture: true, once: true })
+  e.stopPropagation()
+}
+
 function setupPressingListeners() {
   document.querySelectorAll("video").forEach(attachPressingListenerToVideo)
 
@@ -34,21 +66,21 @@ function setupPressingListeners() {
   observer.observe(document, { childList: true, subtree: true })
 }
 
-
-
-const swallowClick = (e) => {
-  e.stopPropagation()
-}
-
 function attachPressingListenerToVideo(video) {
+  youtubeSpeedElement = document.querySelector("div.ytp-overlay.ytp-speedmaster-overlay")
+  if (youtubeSpeedElement) youtubeSpeedElement.remove()
+
   if (!video || observedVideos.has(video)) return
   observedVideos.add(video)
 
-  video.addEventListener("mousedown", (e) => {
-    e.stopPropagation();
+
+
+  const initialMouseDownOnVideo = (e) => {
+    logEvent("initial mousedown on video", { capture: true })
     videoPressed = true;
     setTimeout(() => {
       if (videoPressed) {
+        logEvent("initial mousedown on video but after timeout", { capture: true })
         video.addEventListener("click", swallowClick, { capture: true, once: true })
 
         currentVideo = video
@@ -60,12 +92,17 @@ function attachPressingListenerToVideo(video) {
         showClickMarker(e.clientX, e.clientY)
         controllerBrain.toggleOn()
       }
-    }, 499);
-  }, true);
+    }, 501);
+  }
 
-  video.addEventListener("mouseup", () => {
+  const initalMouseUpOnDocument = () => {
+    logEvent("initial mouseup and pressed is false")
     videoPressed = false
-  })
+  }
+
+
+  video.addEventListener("mousedown", initialMouseDownOnVideo, true);
+  document.addEventListener("mouseup", initalMouseUpOnDocument, true)
 
 }
 
@@ -106,17 +143,22 @@ function showClickMarker(clientX, clientY) {
     }
   };
 
-  const markerMouseUpHandler = () => {
+  const markerMouseUpHandler = (e) => {
+    e.stopPropagation()
+    logEvent("mouse up on marker", { once: true })
+
     marker.classList.add("vsc-marker-clicked");
     lockIcon.classList.add("vsc-lock-animate");
     document.removeEventListener("mouseup", documentMouseUpHandler, true);
-    currentVideo.addEventListener("mouseup", documentMouseUpHandler, {capture: true, once: true});
+    currentVideo.addEventListener("mouseup", videoMouseUpHandler, {once: true});
 
     marker.addEventListener("click", () => {
       setTimeout(() => {
+        logEvent("click on the lock icon", { once: true })
+        controllerBrain.toggleOn()
         attachSpeedController();
-        document.removeEventListener("mouseup", documentMouseUpHandler, true);
-        currentVideo.removeEventListener("mouseup", documentMouseUpHandler, true);
+        document.removeEventListener("mouseup", documentMouseUpHandler);
+        currentVideo.removeEventListener("mouseup", videoMouseUpHandler);
 
         cleanupMarker();
         currentVideo?.removeEventListener("click", swallowClick, true);
@@ -125,15 +167,23 @@ function showClickMarker(clientX, clientY) {
   };
 
   const documentMouseUpHandler = (event) => {
-    if (!marker.contains(event.target)) {
-      cleanupMarker();
-      // currentVideo?.removeEventListener("click", swallowClick, true);
-      controllerBrain.toggleOff();
-    }
+    if (marker.contains(event.target)) return
+    logEvent("after market appeared mouseUp on the doc area", { capture: true, once: true })
+    cleanupMarker();
+    // event.stopPropagation()
+    controllerBrain.toggleOff();
+  };
+
+  const videoMouseUpHandler = (event) => {
+    if (marker.contains(event.target)) return
+    logEvent("after market is locked mouseUp on the video area", { capture: true, once: true })
+    cleanupMarker();
+    // event.stopPropagation()
+    controllerBrain.toggleOff();
   };
 
   marker.addEventListener("mouseup", markerMouseUpHandler, { once: true });
-  document.addEventListener("mouseup", documentMouseUpHandler, {capture: true, once: true});
+  document.addEventListener("mouseup", documentMouseUpHandler, { once: true});
 }
 
 
@@ -248,10 +298,15 @@ function attachSpeedController() {
     controllerBrain.toggleOff();
   };
 
+  logEvent("ratechange")
   currentVideo.addEventListener("ratechange", ratechangeHandler);
+  logEvent("click")
   restoreButton.addEventListener("click", toggleButtonHandler);
+  logEvent("input")
   slider.addEventListener("input", sliderHandler);
+  logEvent("mousedown")
   shadow.querySelector(".draggable").addEventListener("mousedown", draggableHandler);
+  logEvent("click")
   closeButton.addEventListener("click", closeButtonHandler);
 }
 
@@ -290,8 +345,11 @@ function handleDrag(e, controller) {
     yPos = style.top
   };
 
+  logEvent("mouseup")
   window.addEventListener("mouseup", stopDragging);
+  logEvent("mouseleave")
   window.addEventListener("mouseleave", stopDragging);
+  logEvent("mousemove")
   window.addEventListener("mousemove", startDragging);
 }
 
