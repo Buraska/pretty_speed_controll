@@ -1,9 +1,6 @@
 <img width="128" height="128" alt="icon128" src="https://github.com/user-attachments/assets/64587d0b-17ce-4bdc-aae9-ee9d70e91449" />
 
-# Speed Master with switch feature
-
-**Description:**
-Speed control with toggle feature
+# Speed control with toggle feature
 
 It allows you to toggle between speedrates by simply pressing on the video. This extension was inspired by the YouTube feature where pressing → temporarily plays the video at 2× speed. However, this extension lets you set any playback speed and lock the speed rate.
 
